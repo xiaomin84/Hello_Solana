@@ -66,7 +66,8 @@ solana config set --url https://devnet.helius-rpc.com/?api-key=4114aeed-18a7-4c5
 ---
 
 > **关于RPC节点**  
-> 内置RPC节点经常工作不正常，可以参考https://solana.com/zh/rpc 文档，申请一个第三方节点服务
+> 内置RPC节点经常工作不正常，可以参考https://solana.com/zh/rpc 文档，申请一个第三方节点服务.
+>
 > Macbook Intel CPU 用户可能会遇到 HTTP status client error (400 Bad Request) 错误，
 > [原因及解决方案](https://github.com/anza-xyz/agave/issues/8134)
 ---
