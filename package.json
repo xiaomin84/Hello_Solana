@@ -1,0 +1,29 @@
+{
+  "name": "hello-solana",
+  "version": "1.0.0",
+  "description": "Solana SPL Token operations demo",
+  "main": "dist/spl_token_operations.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/spl_token_operations.js",
+    "dev": "ts-node src/spl_token_operations.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "solana",
+    "spl-token",
+    "blockchain"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.95.4",
+    "@solana/spl-token": "^0.4.9",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}
