@@ -7,6 +7,12 @@
     "build": "tsc",
     "start": "node dist/spl_token_operations.js",
     "dev": "ts-node src/spl_token_operations.ts",
+    "build:kit": "tsc",
+    "start:kit": "node dist/spl_token_operations_kit.js",
+    "dev:kit": "ts-node src/spl_token_operations_kit.ts",
+    "build:raw": "tsc",
+    "start:raw": "node dist/spl_token_operations_raw.js",
+    "dev:raw": "ts-node src/spl_token_operations_raw.ts",
     "clean": "rm -rf dist"
   },
   "keywords": [
@@ -19,6 +25,9 @@
   "dependencies": {
     "@solana/web3.js": "^1.95.4",
     "@solana/spl-token": "^0.4.9",
+    "@solana/kit": "^3.0.2",
+    "@solana-program/token": "^0.6.0",
+    "@solana-program/system": "^0.8.0",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
