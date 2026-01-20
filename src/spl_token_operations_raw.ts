@@ -10,7 +10,7 @@ import {
 import {
   createInitializeMint2Instruction,
   createAssociatedTokenAccountIdempotentInstruction,
-  createMintToInstruction,
+  createMintToCheckedInstruction,
   createTransferInstruction,
   getAssociatedTokenAddress,
   getAccount,
@@ -184,14 +184,16 @@ async function mintToRaw(
   mint: PublicKey,
   destination: PublicKey,
   authority: PublicKey,
-  amount: number
+  amount: bigint,
+  decimals: number
 ): Promise<string> {
   // 创建铸造指令
-  const mintToInstruction = createMintToInstruction(
+  const mintToInstruction = createMintToCheckedInstruction(
     mint, // mint
     destination, // destination (token account)
     authority, // mint authority
     amount, // amount
+    decimals, // decimals
     [], // multiSigners (如果 authority 是多重签名账户)
     TOKEN_PROGRAM_ID
   );
@@ -213,7 +215,7 @@ async function transferRaw(
   source: PublicKey,
   destination: PublicKey,
   authority: PublicKey,
-  amount: number
+  amount: bigint
 ): Promise<string> {
   // 创建转账指令
   const transferInstruction = createTransferInstruction(
@@ -241,7 +243,6 @@ async function main() {
 
   // 1. 建立连接
   const connection = new Connection(RPC_ENDPOINT, "confirmed");
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
   console.log("✅ 连接到 Solana:", RPC_ENDPOINT);
 
   // 2. 加载支付者密钥对
@@ -267,13 +268,14 @@ async function main() {
   }
 
   // 3. 使用原始指令创建新的 Token Mint
+  const decimals = 9; // 小数位数
   console.log("📝 正在使用原始指令创建新的 Token Mint...");
   const mint = await createMintRaw(
     connection,
     payer, // 支付交易费用的账户
     payer.publicKey, // Mint Authority（铸币权限）
     payer.publicKey, // Freeze Authority（冻结权限）
-    9 // 小数位数 (decimals)
+    decimals // 小数位数 (decimals)
   );
   console.log("✅ Token Mint 地址:", mint.toBase58());
 
@@ -292,22 +294,23 @@ async function main() {
   console.log(`   当前余额: ${payerAccountInfo.amount}\n`);
 
   // 5. 使用原始指令铸造 Token（发行）
-  const mintAmount = 1000 * 1e9; // 1000 个 token (考虑 9 位小数)
-  console.log(`📝 正在使用原始指令铸造 ${mintAmount / 1e9} 个 Token...`);
+  const mintAmount = BigInt(1000) * BigInt(10 ** decimals); // 1000 个 token (考虑 9 位小数)
+  console.log(`📝 正在使用原始指令铸造 ${Number(mintAmount) / 10 ** decimals} 个 Token...`);
   const mintSignature = await mintToRaw(
     connection,
     payer,
     mint,
     payerTokenAccount,
     payer.publicKey, // Mint Authority
-    mintAmount
+    mintAmount,
+    decimals
   );
   console.log("✅ 铸造成功！");
   console.log("   交易签名:", mintSignature);
 
   // 查询更新后的余额
   const updatedAccount = await getAccount(connection, payerTokenAccount);
-  console.log(`   新余额: ${Number(updatedAccount.amount) / 1e9} tokens\n`);
+  console.log(`   新余额: ${Number(updatedAccount.amount) / 10 ** decimals} tokens\n`);
 
   // 6. 创建接收者账户并转账
   console.log("📝 创建接收者账户...");
@@ -329,8 +332,8 @@ async function main() {
   console.log(`   当前余额: ${receiverAccountInfo.amount}\n`);
 
   // 7. 使用原始指令转账 Token
-  const transferAmount = 100 * 1e9; // 转账 100 个 token
-  console.log(`📝 正在使用原始指令转账 ${transferAmount / 1e9} 个 Token...`);
+  const transferAmount = BigInt(100) * BigInt(10 ** decimals);  // 转账 100 个 token
+  console.log(`📝 正在使用原始指令转账 ${Number(transferAmount) / 10 ** decimals} 个 Token...`);
   const transferSignature = await transferRaw(
     connection,
     payer,
@@ -347,8 +350,8 @@ async function main() {
   const finalPayerAccount = await getAccount(connection, payerTokenAccount);
   const finalReceiverAccount = await getAccount(connection, receiverTokenAccount);
 
-  console.log(`   支付者: ${Number(finalPayerAccount.amount) / 1e9} tokens`);
-  console.log(`   接收者: ${Number(finalReceiverAccount.amount) / 1e9} tokens`);
+  console.log(`   支付者: ${Number(finalPayerAccount.amount) / 10 ** decimals} tokens`);
+  console.log(`   接收者: ${Number(finalReceiverAccount.amount) / 10 ** decimals} tokens`);
 }
 
 // 执行主函数
